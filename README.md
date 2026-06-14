@@ -9,15 +9,15 @@ A plant under stress emits both volatile organic compounds (VOCs) and acoustic s
 ## Repository Structure
 
 ```
-github/
-├── codes/
-│   ├── 1-Simulation.py          # Dataset generator (VOC + acoustic simulation)
-│   ├── 2-QR Factorization.py    # Agent-plant sensor selection
-│   └── 3-Analyses.py            # Localization pipeline and evaluations
-└── dataset/
-    ├── dataset.h5               # Simulated VOC and acoustic measurements
-    └── metadata.csv             # Per-scenario transmitter and wind metadata
+1-Simulation.py          # Dataset generator (VOC + acoustic simulation)
+2-QR Factorization.py    # Agent-plant sensor selection
+3-Analyses.py            # Localization pipeline and evaluations
+dataset.h5                # Simulated VOC and acoustic measurements
+metadata.csv              # Per-scenario transmitter and wind metadata
+README.md
 ```
+
+All files are at the repository root. Running the scripts below generates additional output files (JSON results and PNG figures) in the working directory; these are not included in the repository.
 
 ## 1. Dataset Generation (`1-Simulation.py`)
 
@@ -29,15 +29,17 @@ Each scenario combines one of 4 source (stressed-plant) locations with one of 13
 python "1-Simulation.py" --dx 0.05 --out dataset.h5 --csv metadata.csv
 ```
 
+(`dataset.h5` and `metadata.csv` are already included in this repository, so this step is optional unless you want to regenerate them.)
+
 ## 2. Agent-Plant Selection (`2-QR Factorization.py`)
 
 Selects which plants in the canopy act as sensing agents using greedy, column-pivoted QR factorization on a Gaussian sensitivity matrix over a source grid. Produces ranked agent selections for N = 1, 2, 5, 10, 20, 50 agents, subject to a minimum spatial separation, and a 5-panel scatter plot of the selected layouts.
 
 ```bash
-python "2-QR Factorization.py" --h5 ../dataset/dataset.h5 --csv ../dataset/metadata.csv
+python "2-QR Factorization.py" --h5 dataset.h5 --csv metadata.csv
 ```
 
-Outputs: `agent_plant_selection.json`, `agent_plant_map.png`.
+Outputs (generated locally, not included in the repo): `agent_plant_selection.json`, `agent_plant_map.png`.
 
 ## 3. Localization Pipeline and Evaluations (`3-Analyses.py`)
 
@@ -49,10 +51,12 @@ Runs the two-stage localization pipeline and a suite of evaluations across all 5
 Evaluations include: agent availability sweep, parameter perturbation robustness, signal-modality ablation (TDOA-only / VOC-only / fusion), per-source-position MAE, VOC and acoustic sensor-detection threshold tiers, bounding-radius sensitivity, ToA timing-noise and clock-bias sweeps, and VOC-gate sensitivity.
 
 ```bash
-python "3-Analyses.py" --h5 ../dataset/dataset.h5 --csv ../dataset/metadata.csv --agents ../figures/agent_plant_selection.json
+python "3-Analyses.py" --h5 dataset.h5 --csv metadata.csv --agents agent_plant_selection.json
 ```
 
-Outputs: result JSONs and figures (`results_*.json`, `fig_*.png`) summarizing each evaluation.
+(`agent_plant_selection.json` is produced by running `2-QR Factorization.py` first.)
+
+Outputs (generated locally, not included in the repo): result JSONs and figures (`results_*.json`, `fig_*.png`) summarizing each evaluation.
 
 ## Requirements
 
